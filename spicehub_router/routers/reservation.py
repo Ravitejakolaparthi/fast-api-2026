@@ -37,10 +37,33 @@ def get_reservation(reservation_id:int):
     for reservation in Reservations :
         if reservation["id"] == reservation_id:
             return reservation
-@router.post("",response_model=reservationIn)
+    raise HTTPException(
+            status_code=404,
+            detail="Not Found"
+        )
+@router.post("",response_model=reservationOut)
 def Create_reservation(reservation : reservationIn):
     new_reservation = reservation.model_dump()
     new_reservation["id"] = len(Reservations)+1
     Reservations.append(new_reservation)
     return new_reservation
-
+@router.patch("/{reservation_id}",response_model=reservationOut)
+def Update_reservation(reservation_id : int,reservation:reservationUpdate):
+    Updated_reservation = reservation.model_dump(exclude_unset=True)
+    for reservations in Reservations :
+        if reservations["id"] == reservation_id :
+            reservations.update(Updated_reservation)
+            return reservation
+    raise HTTPException(
+        status_code=404,
+        detail="Not Found"
+    )
+@router.delete("/{reservation_id}",response_model=reservationOut)
+def delete_reservation(reservation_id:int):
+    for index ,reservation in enumerate(Reservations):
+        if reservation["id"] == reservation_id :
+            return Reservations.pop(index)
+    raise HTTPException(
+            status_code=404,
+            detail="Not Found"
+        )
